@@ -1,20 +1,26 @@
 plugins {
     id 'java'
+    id 'application'
     id 'org.springframework.boot' version '3.3.5'
     id 'io.spring.dependency-management' version '1.1.6'
+    id 'org.openjfx.javafxplugin' version '0.1.0'
 }
 
 group = 'digital.moveto.botinok'
 version = '0.3.0'
 
-repositories {
-    mavenCentral()
-}
-
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
     }
+}
+
+application {
+    mainClass = 'digital.moveto.botinok.BotinokClientApplication'
+}
+
+repositories {
+    mavenCentral()
 }
 
 dependencies {
@@ -28,9 +34,31 @@ dependencies {
     compileOnly 'org.projectlombok:lombok:1.18.34'
     annotationProcessor('org.projectlombok:lombok:1.18.34')
 
+    implementation('com.microsoft.playwright:playwright:1.48.0')
 
+    implementation 'org.slf4j:slf4j-api:2.0.16'
+
+    runtimeOnly 'com.h2database:h2:2.3.232'
+
+    implementation('org.openjfx:javafx-base:21.0.5')
+    implementation('org.openjfx:javafx-graphics:21.0.5')
+    implementation('org.openjfx:javafx-controls:21.0.5')
 }
 
 test {
     useJUnitPlatform()
+}
+
+javafx {
+    version = "21"
+    modules = ['javafx.controls']
+    configuration = "implementation"
+}
+
+jar {
+    manifest {
+        attributes(
+                'Main-Class': application.mainClass
+        )
+    }
 }

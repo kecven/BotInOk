@@ -50,7 +50,7 @@ public class Account {
     @Column(name = "active_search")
     private Boolean activeSearch;
 
-    @Column(name = "position")
+    @Column(name = "position", nullable = false)
     private String position;
 
     @Column(name = "count_daily_apply", columnDefinition = "int default 15", nullable = false)
@@ -72,7 +72,7 @@ public class Account {
     @Column(name = "work_in_shabat")
     private Boolean workInShabat;
 
-    @Column(name = "remote_work", nullable = true, columnDefinition = "boolean default false")
+    @Column(name = "remote_work", columnDefinition = "boolean default false", nullable = false)
     private Boolean remoteWork;
 
     public String getShortComment(){

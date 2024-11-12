@@ -68,6 +68,10 @@ public class AccountService {
         account.setActiveSearch(true);
         account.setEndDateLicense(LocalDate.now().plusYears(20));
         account.setLocation(DEFAULT_LOCATION);
+        account.setCountDailyApply(15);
+        account.setCountDailyConnect(5);
+        account.setRemoteWork(false);
+        account.setPosition("Senior Java Developer");
 
         account = save(account);
         account.setFolder(account.getId().toString());
