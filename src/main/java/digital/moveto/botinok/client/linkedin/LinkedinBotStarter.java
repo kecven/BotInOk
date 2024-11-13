@@ -113,7 +113,7 @@ public class LinkedinBotStarter {
     }
 
     private void start() {
-        threadIn24Hours = Thread.startVirtualThread(() -> {
+        threadIn24Hours = new Thread(() -> {
             try {
                 int oneDayInMilliseconds = 1000 * 60 * 60 * 24;
                 int tenMinutesInMilliseconds = 1000 * 60 * 10;
