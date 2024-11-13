@@ -21,8 +21,8 @@ Botinok Client is an open-source project that automates LinkedIn interactions us
 ### Clone the Repository
 
 ```bash
-git clone https://github.com/kecven/botInOk-all.git
-cd botinok-client
+git clone https://github.com/kecven/BotInOk.git
+cd BotInOk
 ```
 
 ### Build the Project
@@ -32,9 +32,14 @@ cd botinok-client
 ```
 
 ### Run the Application
-
+For linux:
 ```bash
-./client/start.sh
+    java --module-path ./libs/linux-javafx-sdk-21.0.5/lib --add-modules javafx.controls -jar build/libs/BotInOk-0.3.0.jar
+```
+
+For Windows:
+```bash
+    java --module-path ./libs/windows-javafx-sdk-21.0.5/lib --add-modules javafx.controls -jar build/libs/BotInOk-0.3.0.jar
 ```
 
 ## Configuration
