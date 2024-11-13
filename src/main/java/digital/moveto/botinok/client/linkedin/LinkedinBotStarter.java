@@ -113,21 +113,23 @@ public class LinkedinBotStarter {
     }
 
     private void start() {
-        threadIn24Hours = new Thread(() -> {
+        threadIn24Hours = Thread.startVirtualThread(() -> {
             try {
-                Thread.sleep(1000 * 60 * 60 * 12);
+                int oneDayInMilliseconds = 1000 * 60 * 60 * 24;
+                int tenMinutesInMilliseconds = 1000 * 60 * 10;
+                Thread.sleep(oneDayInMilliseconds - tenMinutesInMilliseconds);
                 if (uiElements.getStartEvery24Hours().isSelected()) {
                     start();
                 }
             } catch (InterruptedException e) {
-                return;
+                log.info("Thread for 24 hours was interrupted");
             }
         });
         threadIn24Hours.start();
 
         runInThread(() -> {
             try {
-                for (int i = 0; i < 1; i++) {
+                for (int i = 0; i < 2; i++) {
                     startSearchConnectsAndConnect();
                 }
             } catch (Exception e) {
