@@ -23,7 +23,7 @@ public class LocationProperty {
     // TODO: OPTIMIZE LOAD AND CACHE. LOAD IN DIFFERENT THREAD. LOADING TAKE AROUND 150 MS
     private static Map<String, LocationProperty> initAllLocations() {
         log.trace("Start init locations from csv file");
-        Map<String, LocationProperty> allLocations = new HashMap<>(30_000);
+        Map<String, LocationProperty> allLocations = new HashMap<>(25_000);
         try (InputStream in = LocationProperty.class.getResourceAsStream("/locations.csv");
              BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
             String line;
