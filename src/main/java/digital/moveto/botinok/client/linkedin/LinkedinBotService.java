@@ -278,7 +278,7 @@ public class LinkedinBotService implements AutoCloseable {
     private void madeContact(ElementHandle elementHandle, AtomicInteger countFor24HoursForAccount) {
         //we try to connect only with hiring people
         if ( ! checkHiringStatus(elementHandle) ) {
-            if (Math.random() < 0.97) {
+            if (Math.random() < globalConfig.probabilityOfConnectWithHiringUser) {
                 log.info("User is not hiring. Skip connect.");
                 return;
             } else {
@@ -696,13 +696,13 @@ public class LinkedinBotService implements AutoCloseable {
 
         contacts.sort((Contact contact1, Contact contact2) -> {
                 if (contact1.getUpdatedDate() == contact2.getUpdatedDate()) {
-                    return 0; // оба значения null
+                    return 0;
                 }
                 if (contact1.getUpdatedDate() == null) {
-                    return -1; // nulls первые
+                    return -1;
                 }
                 if (contact2.getUpdatedDate() == null) {
-                    return 1; // nulls первые
+                    return 1;
                 }
                 return contact1.getUpdatedDate().compareTo(contact2.getUpdatedDate());
             }

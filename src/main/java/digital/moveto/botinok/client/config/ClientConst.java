@@ -13,7 +13,7 @@ public interface ClientConst {
     String DEFAULT_URL_FOR_MY_CONNECTIONS = "https://www.linkedin.com/mynetwork/invite-connect/connections/";
 
     int MAX_PAGE_ON_LINKEDIN = 100;
-    int MAX_COUNT_PAGE_FOR_ONE_TIME = 50;
+    int MAX_COUNT_PAGE_FOR_ONE_TIME = 100;
     int SLEEP_BETWEEN_START_BOT_FOR_DIFFERENT_USERS = 20 * 1000;
 
     int COUNT_POSITION_ON_ONE_PAGE = 25;
