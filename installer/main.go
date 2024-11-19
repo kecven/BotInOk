@@ -1,235 +1,230 @@
 package main
 
 import (
-    "archive/zip"
-    "fmt"
-    "io"
-    "io/ioutil"
-    "net/http"
-    "os"
-//     "os/exec"
-    "os/user"
-    "path/filepath"
-    "runtime"
-    "strings"
+	"archive/zip"
+	"fmt"
+	"io"
+	"io/ioutil"
+	"net/http"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"runtime"
 )
 
 func main() {
-    osType := runtime.GOOS
-    fmt.Println("Operating System:", osType)
+	// Determine the operating system
+	osType := runtime.GOOS
+	fmt.Printf("Operating system: %s\n", osType)
 
-    // Determine URLs for downloading OpenJDK and JavaFX based on OS
-    var openJDKURL, javaFXURL string
+	// Path to the application directory in the user's home directory
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		fmt.Println("Failed to get home directory:", err)
+		return
+	}
 
-    switch osType {
-    case "windows":
-        openJDKURL = "https://botinok.work/downloads/windows-jdk-21.0.5.zip"
-        javaFXURL = "https://botinok.work/downloads/windows-javafx-sdk-21.0.5.zip"
-    case "darwin":
-        openJDKURL = "https://botinok.work/downloads/macos-jdk-21.0.5.jdk.zip"
-        javaFXURL = "https://botinok.work/downloads/macos-javafx-sdk-21.0.5.zip"
-    case "linux":
-        openJDKURL = "https://botinok.work/downloads/linux-jdk-21.0.5.zip"
-        javaFXURL = "https://botinok.work/downloads/linux-javafx-sdk-21.0.5.zip"
-    default:
-        fmt.Println("Unsupported operating system")
-        return
-    }
+	appDir := filepath.Join(homeDir, ".botinok")
+	err = os.MkdirAll(appDir, os.ModePerm)
+	if err != nil {
+		fmt.Println("Failed to create application directory:", err)
+		return
+	}
 
-    // Installation directory: ~/.botinok
-    usr, err := user.Current()
-    if err != nil {
-        fmt.Println("Error getting current user:", err)
-        return
-    }
-    installDir := filepath.Join(usr.HomeDir, ".botinok")
-    os.MkdirAll(installDir, os.ModePerm)
+	// Check if OpenJDK is installed
+	jdkDir := filepath.Join(appDir, "openjdk-21")
+	if _, err := os.Stat(jdkDir); os.IsNotExist(err) {
+		fmt.Println("OpenJDK 21 not found. Downloading...")
+		err = downloadOpenJDK(osType, jdkDir)
+		if err != nil {
+			fmt.Println("Error downloading OpenJDK:", err)
+			return
+		}
+	} else {
+		fmt.Println("OpenJDK 21 is already installed.")
+	}
 
-    // Check and install OpenJDK
-    if !isInstalled(installDir, "openjdk") {
-        fmt.Println("Downloading OpenJDK...")
-        downloadAndExtract(openJDKURL, installDir)
-    } else {
-        fmt.Println("OpenJDK is already installed")
-    }
+	// Check for application updates
+	appFile := filepath.Join(appDir, "BotInOk.jar")
+	localVersionFile := filepath.Join(appDir, "version.txt")
 
-    // Check and install JavaFX
-    if !isInstalled(installDir, "javafx") {
-        fmt.Println("Downloading JavaFX...")
-        downloadAndExtract(javaFXURL, installDir)
-    } else {
-        fmt.Println("JavaFX is already installed")
-    }
+	var localVersion string
+	if _, err := os.Stat(appFile); os.IsNotExist(err) {
+		fmt.Println("Application not found. Downloading the latest version...")
+		err = downloadApp(appFile)
+		if err != nil {
+			fmt.Println("Error downloading application:", err)
+			return
+		}
+		localVersion = getAppVersion(appFile)
+		ioutil.WriteFile(localVersionFile, []byte(localVersion), 0644)
+	} else {
+		fmt.Println("Checking for application updates...")
+		localVersionData, err := ioutil.ReadFile(localVersionFile)
+		if err != nil {
+			fmt.Println("Error reading local application version:", err)
+			return
+		}
+		localVersion = string(localVersionData)
+		latestVersion, err := getLatestVersion()
+		if err != nil {
+			fmt.Println("Error getting the latest application version:", err)
+			return
+		}
+		if localVersion != latestVersion {
+			fmt.Println("A new version is available. Updating application...")
+			err = downloadApp(appFile)
+			if err != nil {
+				fmt.Println("Error downloading application:", err)
+				return
+			}
+			ioutil.WriteFile(localVersionFile, []byte(latestVersion), 0644)
+		} else {
+			fmt.Println("The latest version of the application is already installed.")
+		}
+	}
 
-    // Get the latest version number
-    latestVersion := getLatestVersion("https://botinok.work/downloads/latest_version.txt")
-    if latestVersion == "" {
-        fmt.Println("Failed to get the latest version")
-        return
-    }
+	// Run the application
 
-    // Application download URL
-    appURL := fmt.Sprintf("https://botinok.work/downloads/BotInOk-%s.jar", latestVersion)
-
-    // Application local path
-    localAppDir := filepath.Join(installDir, "build", "libs")
-    os.MkdirAll(localAppDir, os.ModePerm)
-    localAppPath := filepath.Join(localAppDir, fmt.Sprintf("BotInOk-%s.jar", latestVersion))
-
-    // Check local version
-    localVersion := getLocalVersion(installDir)
-
-    if localVersion != latestVersion {
-        fmt.Println("Updating BotInOk application...")
-        downloadFile(appURL, localAppPath)
-        saveLocalVersion(installDir, latestVersion)
-    } else {
-        fmt.Println("You have the latest version of BotInOk")
-    }
-
-    // Launch the application
-    launchApplication(installDir, localAppPath)
+	err = runApp(jdkDir, appFile)
+	if err != nil {
+		fmt.Println("Error running application:", err)
+		return
+	}
 }
 
-func isInstalled(installDir, component string) bool {
-    componentPath := filepath.Join(installDir, component)
-    _, err := os.Stat(componentPath)
-    return !os.IsNotExist(err)
+func downloadOpenJDK(osType, jdkDir string) error {
+	var url string
+	var archiveFile string
+
+	switch osType {
+	case "windows":
+		url = "https://botinok.work/downloads/windows-jdk-21.0.5.zip"
+		archiveFile = filepath.Join(jdkDir, "windows-jdk-21.0.5.zip")
+	case "darwin":
+		url = "https://botinok.work/downloads/macos-jdk-21.0.5.zip"
+		archiveFile = filepath.Join(jdkDir, "macos-jdk-21.0.5.zip")
+	case "linux":
+		url = "https://botinok.work/downloads/linux-jdk-21.0.5.zip"
+		archiveFile = filepath.Join(jdkDir, "linux-jdk-21.0.5.zip")
+	default:
+		return fmt.Errorf("Unsupported operating system: %s", osType)
+	}
+
+	// Create the JDK directory
+	err := os.MkdirAll(jdkDir, os.ModePerm)
+	if err != nil {
+		return err
+	}
+
+	// Download the OpenJDK archive
+	fmt.Println("Downloading OpenJDK 21 from", url)
+	err = downloadFile(archiveFile, url)
+	if err != nil {
+		return err
+	}
+
+	// Extract the archive
+	fmt.Println("Extracting OpenJDK 21...")
+	err = extractZip(archiveFile, jdkDir)
+	if err != nil {
+		return err
+	}
+
+	// Remove the archive
+	os.Remove(archiveFile)
+
+	return nil
 }
 
-func downloadAndExtract(url, installDir string) {
-    tmpZipPath := filepath.Join(os.TempDir(), "temp_download.zip")
-    downloadFile(url, tmpZipPath)
-    extractZip(tmpZipPath, installDir)
-    os.Remove(tmpZipPath)
+func downloadApp(appFile string) error {
+	url := "https://botinok.work/downloads/BotInOk-latest.jar"
+	fmt.Println("Downloading application from", url)
+	return downloadFile(appFile, url)
 }
 
-func downloadFile(url, dest string) {
-    resp, err := http.Get(url)
-    if err != nil {
-        fmt.Println("Error downloading file:", err)
-        return
-    }
-    defer resp.Body.Close()
-
-    out, err := os.Create(dest)
-    if err != nil {
-        fmt.Println("Error creating file:", err)
-        return
-    }
-    defer out.Close()
-
-    _, err = io.Copy(out, resp.Body)
-    if err != nil {
-        fmt.Println("Error saving file:", err)
-        return
-    }
+func getLatestVersion() (string, error) {
+	url := "https://botinok.work/downloads/latest_version.txt"
+	resp, err := http.Get(url)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+	versionData, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+	return string(versionData), nil
 }
 
-func extractZip(zipPath, destDir string) {
-    r, err := zip.OpenReader(zipPath)
-    if err != nil {
-        fmt.Println("Error opening zip file:", err)
-        return
-    }
-    defer r.Close()
-
-    for _, f := range r.File {
-        fpath := filepath.Join(destDir, f.Name)
-        if f.FileInfo().IsDir() {
-            os.MkdirAll(fpath, os.ModePerm)
-            continue
-        }
-        if err = os.MkdirAll(filepath.Dir(fpath), os.ModePerm); err != nil {
-            fmt.Println("Error creating directory:", err)
-            return
-        }
-        outFile, err := os.OpenFile(fpath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
-        if err != nil {
-            fmt.Println("Error opening file:", err)
-            return
-        }
-        rc, err := f.Open()
-        if err != nil {
-            fmt.Println("Error reading zip file:", err)
-            return
-        }
-        _, err = io.Copy(outFile, rc)
-        if err != nil {
-            fmt.Println("Error extracting file:", err)
-            return
-        }
-        outFile.Close()
-        rc.Close()
-    }
+func getAppVersion(appFile string) string {
+	// Implement a way to get the application version from the file
+	// For example, read version from manifest or predefined value
+	return "1.0.0"
 }
 
-func getLatestVersion(url string) string {
-    resp, err := http.Get(url)
-    if err != nil {
-        fmt.Println("Error getting latest version:", err)
-        return ""
-    }
-    defer resp.Body.Close()
-    body, err := ioutil.ReadAll(resp.Body)
-    if err != nil {
-        fmt.Println("Error reading latest version:", err)
-        return ""
-    }
-    return strings.TrimSpace(string(body))
+func downloadFile(filepath string, url string) error {
+	resp, err := http.Get(url)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	out, err := os.Create(filepath)
+	if err != nil {
+		return err
+	}
+	defer out.Close()
+
+	_, err = io.Copy(out, resp.Body)
+	return err
 }
 
-func getLocalVersion(installDir string) string {
-    versionFile := filepath.Join(installDir, "version.txt")
-    data, err := ioutil.ReadFile(versionFile)
-    if err != nil {
-        return ""
-    }
-    return strings.TrimSpace(string(data))
+func extractZip(src string, dest string) error {
+	r, err := zip.OpenReader(src)
+	if err != nil {
+		return err
+	}
+	defer r.Close()
+
+	for _, f := range r.File {
+		fpath := filepath.Join(dest, f.Name)
+
+		if f.FileInfo().IsDir() {
+			os.MkdirAll(fpath, os.ModePerm)
+			continue
+		}
+
+		if err = os.MkdirAll(filepath.Dir(fpath), os.ModePerm); err != nil {
+			return err
+		}
+
+		outFile, err := os.OpenFile(fpath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
+		if err != nil {
+			return err
+		}
+
+		rc, err := f.Open()
+		if err != nil {
+			return err
+		}
+
+		_, err = io.Copy(outFile, rc)
+
+		outFile.Close()
+		rc.Close()
+
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
-func saveLocalVersion(installDir, version string) {
-    versionFile := filepath.Join(installDir, "version.txt")
-    ioutil.WriteFile(versionFile, []byte(version), 0644)
-}
-
-func launchApplication(installDir, appPath string) {
-    // Find the JavaFX lib directory
-    javafxBase := filepath.Join(installDir, "javafx")
-    javafxLib := ""
-
-    // Assuming that JavaFX is extracted to a directory like javafx-sdk-21.0.5
-    files, err := ioutil.ReadDir(javafxBase)
-    if err != nil {
-        fmt.Println("Error reading JavaFX directory:", err)
-        return
-    }
-    for _, file := range files {
-        if file.IsDir() && strings.HasPrefix(file.Name(), "javafx-sdk") {
-            javafxLib = filepath.Join(javafxBase, file.Name(), "lib")
-            break
-        }
-    }
-    if javafxLib == "" {
-        fmt.Println("JavaFX lib directory not found")
-        return
-    }
-
-//     // Java binary path
-//     javaBin := filepath.Join(installDir, "openjdk", "bin", "java")
-//
-//     // Command to launch the application
-//     cmd := exec.Command(
-//         javaBin,
-//         "--module-path", javafxLib,
-//         "--add-modules", "javafx.controls",
-//         "-jar", appPath,
-//     )
-//
-//     cmd.Stdout = os.Stdout
-//     cmd.Stderr = os.Stderr
-//     err = cmd.Run()
-//     if err != nil {
-//         fmt.Println("Error launching application:", err)
-//     }
+func runApp(jdkDir, appFile string) error {
+	javaExec := filepath.Join(jdkDir, "openjdk-21.0.5", "bin", "java.exe")
+	cmd := exec.Command(javaExec, "-jar", appFile)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
 }
