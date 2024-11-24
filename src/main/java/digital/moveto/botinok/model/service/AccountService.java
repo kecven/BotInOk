@@ -13,6 +13,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static digital.moveto.botinok.model.Const.DEFAULT_LOCATION;
+import static digital.moveto.botinok.model.Const.DEFAULT_POSITION;
 
 @Service
 public class AccountService {
@@ -71,7 +72,7 @@ public class AccountService {
         account.setCountDailyApply(15);
         account.setCountDailyConnect(5);
         account.setRemoteWork(false);
-        account.setPosition("Senior Java Developer");
+        account.setPosition(DEFAULT_POSITION);
 
         account = save(account);
         account.setFolder(account.getId().toString());

@@ -31,6 +31,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static digital.moveto.botinok.client.config.ClientConst.*;
+import static digital.moveto.botinok.model.Const.*;
 import static java.lang.Character.MAX_RADIX;
 
 @Slf4j
@@ -587,17 +588,12 @@ public class LinkedinBotService implements AutoCloseable {
                 playwrightService.open("https://www.linkedin.com/feed/");
                 sleep(3000);
             }
-            Optional<ElementHandle> elementByLocator = playwrightService.getElementByLocator("div > div > div > a > div.t-16.t-black.t-bold");
-            if (elementByLocator.isPresent()) {
-                String text = elementByLocator.get().textContent();
-                log.info("User name: " + text);
-                if (text != null && text.contains(" ")) {
-                    text = text.trim();
-                    account.setFirstName(text.substring(0, text.indexOf(" ")));
-                    account.setLastName(text.substring(text.indexOf(" ") + 1));
-                    accountService.save(account);
-                    return true;
-                }
+            Optional<ElementHandle> elementWithUserData = playwrightService.getElementByLocator(".profile-card-member-details");
+            if (elementWithUserData.isPresent()) {
+                parseUserName(elementWithUserData.get(), account);
+                parseUserPositionAndLocation(elementWithUserData.get(), account);
+                accountService.save(account);
+                return true;
             } else {
                 log.error("Can't find user name");
             }
@@ -605,6 +601,52 @@ public class LinkedinBotService implements AutoCloseable {
         return false;
     }
 
+    private void parseUserName(ElementHandle elementWithUserData, Account account) {
+        try {
+            String userName = elementWithUserData.querySelector("h3").textContent();
+            log.info("User name: " + userName);
+            if (userName != null && userName.contains(" ")) {
+                userName = userName.trim();
+                account.setFirstName(userName.substring(0, userName.indexOf(" ")));
+                account.setLastName(userName.substring(userName.indexOf(" ") + 1));
+                uiElements.addLogToLogArea("User name: " + userName);
+            }
+        } catch (Exception e) {
+            log.error("Error while parseUserName", e);
+        }
+    }
+
+    private void parseUserPositionAndLocation(ElementHandle elementWithUserData, Account account) {
+        try {
+
+            List<ElementHandle> positionAndLocation = elementWithUserData.querySelectorAll("p");
+            if (positionAndLocation.size() >= 2) {
+                if (account.getPosition() == null
+                        || account.getPosition().isEmpty()
+                        || DEFAULT_LOCATION.equalsIgnoreCase(account.getLocation())) {
+                    String position = positionAndLocation.get(0).textContent().trim();
+                    account.setPosition(position);
+                    uiElements.addLogToLogArea("Find position on LinkedIn: " + position);
+                }
+
+                if (account.getLocation() == null
+                        || account.getLocation().isEmpty()
+                        || DEFAULT_POSITION.equalsIgnoreCase(account.getLocation())) {
+                    String fullLocation = positionAndLocation.get(1).textContent().trim();
+                    LocationProperty locationProperty = LocationProperty.getByName(fullLocation.substring(fullLocation.lastIndexOf(",") + 1).trim());
+                    uiElements.addLogToLogArea("Find location on LinkedIn: " + fullLocation);
+                    if (locationProperty != null) {
+                        account.setLocation(locationProperty.getKey());
+                    } else {
+                        log.error("Can't find location: " + fullLocation);
+                        account.setLocation(DEFAULT_POSITION_UNITED_STATES);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.error("Error while parseUserPositionAndLocation", e);
+        }
+    }
 
     public void parseLinkedinUrlOfConnections() {
         log.info("Start parseLinkedinUrlOfConnections for user " + account.getFullName());
@@ -969,23 +1011,4 @@ public class LinkedinBotService implements AutoCloseable {
             }
         }
     }
-
-//    @Transactional
-//    public void configLinkedInAccount(){
-//        log.info("Start config LinkedIn account");
-//
-//        openNotHeadlessBrowserIfNeed();
-//
-//        playwrightService.open("https://moveto.digital/boty_config.html");
-//        playwrightService.sleepRandom(1000);
-//        playwrightService.waitForSelector("#result > div");
-//
-//        linkedinAccount.setWorkInShabat(playwrightService.getElementByLocator("#work_in_shabat").get().isChecked());
-//        linkedinAccount.setActiveSearch(playwrightService.getElementByLocator("#active_search").get().isChecked());
-//        linkedinAccount.setPosition(playwrightService.getElementByLocator("#positions").get().inputValue());
-//        linkedinAccount.setLocation(Location.valueOf(playwrightService.getElementByLocator("#location").get().inputValue()));
-//        linkedinAccount = linkedinAccountService.save(linkedinAccount);
-//
-//        closeHeadlessBrowserIfNeed();
-//    }
 }

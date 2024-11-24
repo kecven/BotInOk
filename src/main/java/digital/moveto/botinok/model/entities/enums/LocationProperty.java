@@ -52,8 +52,15 @@ public class LocationProperty {
                 return location;
             }
         }
+
+        for (LocationProperty location : allLocations.values()) {
+            if (location.name.toLowerCase().contains(name.toLowerCase())) {
+                return location;
+            }
+        }
         return null;
     }
+
     public static LocationProperty getByKey(String key) {
         for (LocationProperty location : allLocations.values()) {
             if (location.key.equalsIgnoreCase(key)) {
