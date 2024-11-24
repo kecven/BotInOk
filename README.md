@@ -1,6 +1,6 @@
 # BotInOk
 
-Botinok Client is an open-source project that automates LinkedIn interactions using Java, Spring Boot, and Playwright. It helps users to connect with potential contacts and apply for job positions on LinkedIn.
+BotInOk Client is an open-source project that automates LinkedIn interactions using Java, Spring Boot, and Playwright. It helps users to connect with potential contacts and apply for job positions on LinkedIn.
 
 ## Features
 
@@ -13,10 +13,23 @@ Botinok Client is an open-source project that automates LinkedIn interactions us
 ## Prerequisites
 
 - Java 21
-- Gradle 8
-- Git
+- Gradle 8 (if building from source)
+- Git (if cloning the repository)
 
 ## Getting Started
+
+### Download the Latest Build
+
+To download the latest version of BotInOk, click the link below:
+
+[BotInOk Windows with JDK](https://botinok.work/downloads/windows.zip)
+[BotInOk MacOs with JDK](https://botinok.work/downloads/macos.zip)
+[BotInOk Linux with JDK](https://botinok.work/downloads/linux.zip)
+[BotInOk JAR without JDK](https://botinok.work/downloads/BotInOk-latest.jar)
+
+## Building from Source
+
+If you'd like to build the project yourself:
 
 ### Clone the Repository
 
@@ -31,8 +44,9 @@ cd BotInOk
 ./gradlew build
 ```
 
-### Run the Application
-For linux:
+### Run the Application from Build
+
+For Linux:
 ```bash
 java --module-path ./libs/linux-javafx-sdk-21.0.5/lib --add-modules javafx.controls -jar build/libs/BotInOk-0.3.0.jar
 ```
@@ -42,7 +56,7 @@ For Windows:
 java --module-path ./libs/windows-javafx-sdk-21.0.5/lib --add-modules javafx.controls -jar build/libs/BotInOk-0.3.0.jar
 ```
 
-For MacOs:
+For macOS:
 ```bash
 java --module-path ./libs/macos-javafx-sdk-21.0.5/lib --add-modules javafx.controls -jar build/libs/BotInOk-0.3.0.jar
 ```
