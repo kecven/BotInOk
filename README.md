@@ -22,11 +22,11 @@ BotInOk Client is an open-source project that automates LinkedIn interactions us
 
 To download the latest version of BotInOk, click the link below:
 
-[BotInOk Windows with JDK](https://botinok.work/downloads/windows.zip)
+[BotInOk Windows with JDK](https://botinok.work/downloads/BotInOk-windows.zip)
 
-[BotInOk MacOs with JDK](https://botinok.work/downloads/macos.zip)
+[BotInOk MacOs with JDK](https://botinok.work/downloads/BotInOk-macos.zip)
 
-[BotInOk Linux with JDK](https://botinok.work/downloads/linux.zip)
+[BotInOk Linux with JDK](https://botinok.work/downloads/BotInOk-linux.zip)
 
 [BotInOk JAR without JDK](https://botinok.work/downloads/BotInOk-latest.jar)
 
