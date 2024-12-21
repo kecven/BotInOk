@@ -356,9 +356,15 @@ public class LinkedinBotService implements AutoCloseable {
         uiElements.addLogToLogArea("Connect with: " + contactName);
     }
 
-    private boolean checkForLimitInvitationsAndCloseDialog() {
+    /**
+     * Check for limit invitations and close dialog
+     * if we already make a decision then we have limits then just skip it
+     * @throws RetryMadeContactException if no free personalized invitations left
+     *
+     */
+    private void checkForLimitInvitationsAndCloseDialog() {
         if (accountNoFreePersonalizedInvitationsLeft) {
-            return false;
+            return;
         }
         if (playwrightService.isTextFind("No free personalized invitations left")
                 || playwrightService.isTextFind("Personalize all your invites and access AI writing")
@@ -369,7 +375,6 @@ public class LinkedinBotService implements AutoCloseable {
             playwrightService.sleepRandom(500);
             throw new RetryMadeContactException("No free personalized invitations left");
         }
-        return true;
     }
     private String generateInviteMessage() {
         for (int i = 0; i < 1_000; i++) {
