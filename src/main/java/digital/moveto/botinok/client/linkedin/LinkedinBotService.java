@@ -319,6 +319,8 @@ public class LinkedinBotService implements AutoCloseable {
             }
         }
 
+        checkForLimitInvitationsAndCloseDialog();
+
         // invitation without text
         if (accountNoFreePersonalizedInvitationsLeft) {
             playwrightService.getElementWithCurrentText("Send without a note").ifPresent(ElementHandle::click);
@@ -327,18 +329,7 @@ public class LinkedinBotService implements AutoCloseable {
 
             playwrightService.getElementWithCurrentText("Add a note").ifPresent(ElementHandle::click);
             playwrightService.sleepRandom(500);
-
-
-
-            if (playwrightService.isTextFind("No free personalized invitations left")
-                    || playwrightService.isTextFind("Personalize all your invites and access AI writing")) {
-                log.info("You've sent too many invitations for user " + account.getFullName());
-                accountNoFreePersonalizedInvitationsLeft = true;
-                playwrightService.getElementByLocator("svg[data-test-icon=\"close-medium\"]").ifPresent(ElementHandle::click);
-                playwrightService.sleepRandom(500);
-                throw new RetryMadeContactException("No free personalized invitations left");
-            }
-
+            checkForLimitInvitationsAndCloseDialog();
 
             final String inviteMessage = generateInviteMessage();
             playwrightService.getElementByLocator("textarea[name=message]").ifPresent(eh -> eh.type(inviteMessage, new ElementHandle.TypeOptions().setDelay(10)));
@@ -365,6 +356,18 @@ public class LinkedinBotService implements AutoCloseable {
         uiElements.addLogToLogArea("Connect with: " + contactName);
     }
 
+    private boolean checkForLimitInvitationsAndCloseDialog() {
+        if (playwrightService.isTextFind("No free personalized invitations left")
+                || playwrightService.isTextFind("Personalize all your invites and access AI writing")
+                || playwrightService.isTextFind("0 personalized invitations remaining for this month.")) {
+            log.info("You've sent too many invitations for user " + account.getFullName());
+            accountNoFreePersonalizedInvitationsLeft = true;
+            playwrightService.getElementByLocator("svg[data-test-icon=\"close-medium\"]").ifPresent(ElementHandle::click);
+            playwrightService.sleepRandom(500);
+            throw new RetryMadeContactException("No free personalized invitations left");
+        }
+        return true;
+    }
     private String generateInviteMessage() {
         for (int i = 0; i < 1_000; i++) {
             String result = randomString("Hi", "Hi there", "Hello", "Good day", "Greetings", "Hey", "Hey there", "Good afternoon")
