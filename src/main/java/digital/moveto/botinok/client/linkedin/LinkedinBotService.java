@@ -357,6 +357,9 @@ public class LinkedinBotService implements AutoCloseable {
     }
 
     private boolean checkForLimitInvitationsAndCloseDialog() {
+        if (accountNoFreePersonalizedInvitationsLeft) {
+            return false;
+        }
         if (playwrightService.isTextFind("No free personalized invitations left")
                 || playwrightService.isTextFind("Personalize all your invites and access AI writing")
                 || playwrightService.isTextFind("0 personalized invitations remaining for this month.")) {
