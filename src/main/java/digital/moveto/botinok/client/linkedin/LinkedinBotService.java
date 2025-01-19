@@ -917,16 +917,33 @@ public class LinkedinBotService implements AutoCloseable {
      * @param positionToCheck position to check
      * @return true if position suitable
      */
-    public boolean isPositionSuitable(List<String> validPositions, String positionToCheck) {
-        String normalizedPositionToCheck = positionToCheck.toLowerCase();
+    public static boolean isPositionSuitable(List<String> validPositions, String positionToCheck) {
+        String[] wordsToCheck = positionToCheck.toLowerCase().split("\\W+");
 
         for (String validPosition : validPositions) {
-            String normalizedValidPosition = validPosition.toLowerCase();
-            if (normalizedPositionToCheck.contains(normalizedValidPosition)) {
+            String[] validWords = validPosition.toLowerCase().split("\\W+");
+
+            if (containsAllWords(wordsToCheck, validWords)) {
                 return true;
             }
         }
         return false;
+    }
+
+    private static boolean containsAllWords(String[] wordsToCheck, String[] validWords) {
+        for (String validWord : validWords) {
+            boolean wordFound = false;
+            for (String word : wordsToCheck) {
+                if (word.equals(validWord)) {
+                    wordFound = true;
+                    break;
+                }
+            }
+            if (!wordFound) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private void applyToCurrentPosition(AtomicInteger countApply){
