@@ -39,14 +39,14 @@ import static java.lang.Character.MAX_RADIX;
 @Scope(BeanDefinition.SCOPE_PROTOTYPE)
 public class LinkedinBotService implements AutoCloseable {
 
-    private PlaywrightService playwrightService;
-    private AccountService accountService;
-    private MadeContactService madeContactService;
-    private MadeApplyService madeApplyService;
-    private ContactService contactService;
-    private CompanyService companyService;
-    private GlobalConfig globalConfig;
-    private UiElements uiElements;
+    private final PlaywrightService playwrightService;
+    private final AccountService accountService;
+    private final MadeContactService madeContactService;
+    private final MadeApplyService madeApplyService;
+    private final ContactService contactService;
+    private final CompanyService companyService;
+    private final GlobalConfig globalConfig;
+    private final UiElements uiElements;
 
     private Account account;
 
@@ -202,11 +202,11 @@ public class LinkedinBotService implements AutoCloseable {
             // try search by 2nd level of my network
             if (Math.random() < 0.5) {
                 stringListMap.put("network", "%5B%22S%22%5D");
-                stringListMap.put("page", String.valueOf((int) (nextPage / 10)));
+                stringListMap.put("page", String.valueOf(nextPage / 10));
             }
 
             if (account.getLocation() != null){
-                stringListMap.put("geoUrn", "%5B%22" + LocationProperty.getByKey(account.getLocation()).getLinkedinId() + "%22%5D");
+                stringListMap.put("geoUrn", "%5B%22" + Objects.requireNonNull(LocationProperty.getByKey(account.getLocation())).getLinkedinId() + "%22%5D");
             }
 
             String nextPageUrl = ClientConst.DEFAULT_URL_FOR_SEARCH_WITHOUT_PARAMS + UrlUtils.createQueryString(stringListMap);
@@ -901,6 +901,8 @@ public class LinkedinBotService implements AutoCloseable {
                 if (countApply.get() >= account.getCountDailyApply()) {
                     return;
                 }
+            } catch (PlaywrightException e) {
+                log.error("Error while apply to position");
             } catch (Exception e){
                 log.error("Error while apply to position", e);
             } finally {
@@ -1043,7 +1045,6 @@ public class LinkedinBotService implements AutoCloseable {
                     log.debug("Discard application #" + countApply.get() + " for position " + madeApply.getPosition() + " in company " + madeApply.getCompany().getName());
                     playwrightService.sleepRandom(1000);
                 }
-
             }
         }
     }
