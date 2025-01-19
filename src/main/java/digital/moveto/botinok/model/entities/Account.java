@@ -1,6 +1,7 @@
 package digital.moveto.botinok.model.entities;
 
 
+import digital.moveto.botinok.client.config.ClientConst;
 import digital.moveto.botinok.model.Const;
 import digital.moveto.botinok.model.dto.AccountDto;
 import jakarta.persistence.*;
@@ -11,8 +12,7 @@ import org.apache.logging.log4j.util.Strings;
 
 import java.lang.reflect.Field;
 import java.time.LocalDate;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 
 @Getter
@@ -150,6 +150,11 @@ public class Account {
             }
         }
         return this;
+    }
+
+    public List<String> getPositions() {
+        String[] split = position.split(ClientConst.SPLIT_FOR_RANDOM_KEYWORDS);
+        return new ArrayList<>(split.length > 1 ? Arrays.asList(split) : Collections.singletonList(position));
     }
 
     @Override

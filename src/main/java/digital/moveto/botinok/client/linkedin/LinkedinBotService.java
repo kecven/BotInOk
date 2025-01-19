@@ -909,14 +909,39 @@ public class LinkedinBotService implements AutoCloseable {
         }
     }
 
+    /**
+     * Check if position suitable for user
+     * @param validPositions list of valid positions
+     * @param positionToCheck position to check
+     * @return true if position suitable
+     */
+    public boolean isPositionSuitable(List<String> validPositions, String positionToCheck) {
+        String normalizedPositionToCheck = positionToCheck.toLowerCase();
+
+        for (String validPosition : validPositions) {
+            String normalizedValidPosition = validPosition.toLowerCase();
+            if (normalizedPositionToCheck.contains(normalizedValidPosition)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private void applyToCurrentPosition(AtomicInteger countApply){
         MadeApply madeApply = new MadeApply();
         madeApply.setAccount(account);
 
-        Optional<ElementHandle> positionNameElement = playwrightService.getElementByLocator("div.jobs-details > div div.jobs-unified-top-card > div div > a > h2");
+        Optional<ElementHandle> positionNameElement = playwrightService.getElementByLocator(".job-details-jobs-unified-top-card__job-title a");
         if (positionNameElement.isPresent()){
-            madeApply.setPosition(positionNameElement.get().textContent().trim());
-            String linkToPosition = playwrightService.getElementByLocator("h2.job-details-jobs-unified-top-card__job-title > a").get().getAttribute("href");
+            String positionName = positionNameElement.get().textContent().trim();
+
+            if ( ! isPositionSuitable(account.getPositions(), positionName)) {
+                log.info("Position {} is not suitable for user {}", positionName, account.getFullName());
+                return;
+            }
+
+            madeApply.setPosition(positionName);
+            String linkToPosition = positionNameElement.get().getAttribute("href");
             linkToPosition = linkToPosition.substring(0, linkToPosition.indexOf("?"));
             if (linkToPosition.startsWith("/")) {
                 linkToPosition = ClientConst.LINKEDIN_URL + linkToPosition;
@@ -924,7 +949,7 @@ public class LinkedinBotService implements AutoCloseable {
             madeApply.setLink(linkToPosition);
         }
 
-        Optional<ElementHandle> companyNameElement = playwrightService.getElementByLocator("div.job-details-jobs-unified-top-card__primary-description-container > div > a");
+        Optional<ElementHandle> companyNameElement = playwrightService.getElementByLocator(".job-details-jobs-unified-top-card__company-name a");
         if (companyNameElement.isPresent()){
             String name = companyNameElement.get().textContent().trim();
             String linkToCompany = companyNameElement.get().getAttribute("href");
