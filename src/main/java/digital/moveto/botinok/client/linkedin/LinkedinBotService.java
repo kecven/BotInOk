@@ -950,7 +950,7 @@ public class LinkedinBotService implements AutoCloseable {
             String positionName = positionNameElement.get().textContent().trim();
 
             if ( ! isPositionSuitable(account.getPositions(), positionName)) {
-                log.info("Position {} is not suitable for user {}", positionName, account.getFullName());
+                log.info("Position {} is not suitable for positions: {}", positionName, account.getPositions());
                 return;
             }
 
