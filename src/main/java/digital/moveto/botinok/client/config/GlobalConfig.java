@@ -30,4 +30,7 @@ public class GlobalConfig {
     @Value("${botinok.connect.probabilityOfConnectWithHiringUser:0.98}")
     public double probabilityOfConnectWithHiringUser;
 
+    @Value("${botinok.apply.thresholdPositionSuitableScore:0.7}")
+    public double thresholdPositionSuitableScore;
+
 }

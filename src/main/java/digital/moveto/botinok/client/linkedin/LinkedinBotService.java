@@ -14,6 +14,7 @@ import digital.moveto.botinok.model.entities.*;
 import digital.moveto.botinok.model.entities.enums.LocationProperty;
 import digital.moveto.botinok.model.service.*;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.text.similarity.JaroWinklerSimilarity;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -917,33 +918,27 @@ public class LinkedinBotService implements AutoCloseable {
      * @param positionToCheck position to check
      * @return true if position suitable
      */
-    public static boolean isPositionSuitable(List<String> validPositions, String positionToCheck) {
-        String[] wordsToCheck = positionToCheck.toLowerCase().split("\\W+");
+    public boolean isPositionSuitable(List<String> validPositions, String positionToCheck) {
+        String normalizedToCheck = normalize(positionToCheck);
+        JaroWinklerSimilarity similarity = new JaroWinklerSimilarity();
 
-        for (String validPosition : validPositions) {
-            String[] validWords = validPosition.toLowerCase().split("\\W+");
-
-            if (containsAllWords(wordsToCheck, validWords)) {
+        for (String valid : validPositions) {
+            String normalizedValid = normalize(valid);
+            double score = similarity.apply(normalizedValid, normalizedToCheck);
+            if (score > globalConfig.thresholdPositionSuitableScore) {
                 return true;
             }
         }
+
         return false;
     }
 
-    private static boolean containsAllWords(String[] wordsToCheck, String[] validWords) {
-        for (String validWord : validWords) {
-            boolean wordFound = false;
-            for (String word : wordsToCheck) {
-                if (word.equals(validWord)) {
-                    wordFound = true;
-                    break;
-                }
-            }
-            if (!wordFound) {
-                return false;
-            }
-        }
-        return true;
+    private String normalize(String position) {
+        return position
+                .toLowerCase()
+                .replaceAll("[^a-zA-Z0-9 ]", "")
+                .replaceAll(" +", " ")
+                .trim();
     }
 
     private void applyToCurrentPosition(AtomicInteger countApply){

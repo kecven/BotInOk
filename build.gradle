@@ -43,6 +43,8 @@ dependencies {
     implementation('org.openjfx:javafx-base:21.0.5')
     implementation('org.openjfx:javafx-graphics:21.0.5')
     implementation('org.openjfx:javafx-controls:21.0.5')
+
+    implementation("org.apache.commons:commons-text:1.13.0")
 }
 
 test {

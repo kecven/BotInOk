@@ -25,4 +25,5 @@ public interface ClientConst {
     String SPLIT_FOR_RANDOM_KEYWORDS = ",";
 
     String VERSION = digital.moveto.botinok.model.Const.VERSION;
+
 }
