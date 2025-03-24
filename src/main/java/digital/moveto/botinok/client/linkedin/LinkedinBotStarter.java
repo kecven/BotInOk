@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import static digital.moveto.botinok.client.config.ClientConst.COUNT_START_SEARCH_PER_ONE_TIME;
+
 @Slf4j
 @Service
 public class LinkedinBotStarter {
@@ -129,7 +131,7 @@ public class LinkedinBotStarter {
 
         runInThread(() -> {
             try {
-                for (int i = 0; i < 2; i++) {
+                for (int i = 0; i < COUNT_START_SEARCH_PER_ONE_TIME; i++) {
                     startSearchConnectsAndConnect();
                 }
             } catch (Exception e) {

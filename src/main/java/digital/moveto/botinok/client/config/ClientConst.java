@@ -12,6 +12,7 @@ public interface ClientConst {
     String DEFAULT_URL_FOR_SEARCH_WITHOUT_PARAMS = "https://www.linkedin.com/search/results/people/?";
     String DEFAULT_URL_FOR_MY_CONNECTIONS = "https://www.linkedin.com/mynetwork/invite-connect/connections/";
 
+    int COUNT_START_SEARCH_PER_ONE_TIME = 1;
     int MAX_PAGE_ON_LINKEDIN = 100;
     int MAX_COUNT_PAGE_FOR_ONE_TIME = 100;
     int SLEEP_BETWEEN_START_BOT_FOR_DIFFERENT_USERS = 20 * 1000;
