@@ -1,7 +1,10 @@
 package digital.moveto.botinok.client.config;
 
+import org.apache.commons.text.similarity.JaroWinklerSimilarity;
+
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 public interface ClientConst {
 
@@ -26,5 +29,14 @@ public interface ClientConst {
     String SPLIT_FOR_RANDOM_KEYWORDS = ",";
 
     String VERSION = digital.moveto.botinok.model.Const.VERSION;
+
+
+    JaroWinklerSimilarity SIMILARITY = new JaroWinklerSimilarity();
+
+    Set<String> STOP_WORDS = Set.of(
+            "senior", "junior", "lead", "middle", "intern", "entry", "level",
+            "principal", "staff", "chief", "engineer", "developer", "specialist",
+            "expert", "consultant", "at", "llc", "inc", "corp", "gmbh", "ltd", "remote", "onsite"
+    );
 
 }

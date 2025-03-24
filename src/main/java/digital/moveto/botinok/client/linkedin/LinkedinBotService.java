@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 import static digital.moveto.botinok.client.config.ClientConst.*;
 import static digital.moveto.botinok.model.Const.*;
@@ -920,11 +921,10 @@ public class LinkedinBotService implements AutoCloseable {
      */
     public boolean isPositionSuitable(List<String> validPositions, String positionToCheck) {
         String normalizedToCheck = normalize(positionToCheck);
-        JaroWinklerSimilarity similarity = new JaroWinklerSimilarity();
 
         for (String valid : validPositions) {
             String normalizedValid = normalize(valid);
-            double score = similarity.apply(normalizedValid, normalizedToCheck);
+            double score = SIMILARITY.apply(normalizedValid, normalizedToCheck);
             if (score > globalConfig.thresholdPositionSuitableScore) {
                 return true;
             }
@@ -933,12 +933,18 @@ public class LinkedinBotService implements AutoCloseable {
         return false;
     }
 
-    private String normalize(String position) {
-        return position
-                .toLowerCase()
-                .replaceAll("[^a-zA-Z0-9 ]", "")
-                .replaceAll(" +", " ")
+    private String normalize(String text) {
+        if (text == null) return "";
+
+        String cleaned = text.toLowerCase()
+                .replaceAll("[^a-z0-9 ]", " ")
+                .replaceAll("\\s+", " ")
                 .trim();
+
+        List<String> words = Arrays.asList(cleaned.split(" "));
+        return words.stream()
+                .filter(word -> !STOP_WORDS.contains(word))
+                .collect(Collectors.joining(" "));
     }
 
     private void applyToCurrentPosition(AtomicInteger countApply){
