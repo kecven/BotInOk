@@ -862,9 +862,13 @@ public class LinkedinBotService implements AutoCloseable {
                     int start = j * COUNT_POSITION_ON_ONE_PAGE;
 
                     if (account.getRemoteWork()) {
-                        playwrightService.open("https://www.linkedin.com/jobs/search/?f_AL=true&f_TPR=r86400&geoId=" + LocationProperty.getLocation(location).getLinkedinId() + "&keywords=" + position + "&location=" + LocationProperty.getLocation(location).getName() + "&refresh=true&start=" + start + "&f_WT=2");
+                        if (Math.random() > 0.5) {
+                            playwrightService.open("https://www.linkedin.com/jobs/search/?f_AL=true&f_TPR=r86400&keywords=" + position + "&refresh=true&start=" + start + "&f_WT=2&origin=JOB_SEARCH_PAGE_LOCATION_AUTOCOMPLETE&refresh=true");
+                        } else {
+                            playwrightService.open("https://www.linkedin.com/jobs/search/?f_AL=true&f_TPR=r86400&geoId=" + LocationProperty.getLocation(location).getLinkedinId() + "&keywords=" + position + "&location=" + LocationProperty.getLocation(location).getName() + "&refresh=true&start=" + start + "&f_WT=2");
+                        }
                     } else {
-                        playwrightService.open("https://www.linkedin.com/jobs/search/?f_AL=true&f_TPR=r86400&geoId=" + LocationProperty.getLocation(location).getLinkedinId() + "&keywords=" + position + "&location=" + LocationProperty.getLocation(location).getName() + "&refresh=true&start=" + start);
+                        playwrightService.open("https://www.linkedin.com/jobs/search/?f_AL=true&f_TPR=r86400&geoId=" + LocationProperty.getLocation(location).getLinkedinId() + "&keywords=" + position + "&location=" + LocationProperty.getLocation(location).getName() + "&origin=JOB_SEARCH_PAGE_LOCATION_AUTOCOMPLETE&refresh=true&start=" + start);
                     }
 
                     playwrightService.sleepRandom(3000);
