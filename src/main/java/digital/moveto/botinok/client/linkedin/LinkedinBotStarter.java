@@ -235,6 +235,8 @@ public class LinkedinBotStarter {
 
         linkedinBotService.applyToPositions();
 
+        linkedinBotService.connectInCurrentLocation();
+
         linkedinBotService.searchConnectsAndConnect();
 
         if (Math.random() > 0.99) {

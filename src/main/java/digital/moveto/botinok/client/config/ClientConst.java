@@ -14,6 +14,7 @@ public interface ClientConst {
     String DEFAULT_URL_FOR_SEARCH = "https://www.linkedin.com/search/results/people/?geoUrn=%5B%22101620260%22%5D&keywords=human%20resources&origin=FACETED_SEARCH&sid=ynM&page=2";
     String DEFAULT_URL_FOR_SEARCH_WITHOUT_PARAMS = "https://www.linkedin.com/search/results/people/?";
     String DEFAULT_URL_FOR_MY_CONNECTIONS = "https://www.linkedin.com/mynetwork/invite-connect/connections/";
+    String DEFAULT_URL_FOR_MY_NETWORK_GROW = "https://www.linkedin.com/mynetwork/grow/";
 
     int COUNT_START_SEARCH_PER_ONE_TIME = 1;
     int MAX_PAGE_ON_LINKEDIN = 100;

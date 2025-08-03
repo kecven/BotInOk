@@ -27,8 +27,8 @@ public class GlobalConfig {
     @Value("true")
     public boolean workOrPauseBoolean;
 
-    @Value("${botinok.connect.probabilityOfConnectWithHiringUser:0.98}")
-    public double probabilityOfConnectWithHiringUser;
+    @Value("${botinok.connect.probabilityOfConnectWithNotHiringUser:0.5}")
+    public double probabilityOfConnectWithNotHiringUser;
 
     @Value("${botinok.apply.thresholdPositionSuitableScore:0.7}")
     public double thresholdPositionSuitableScore;

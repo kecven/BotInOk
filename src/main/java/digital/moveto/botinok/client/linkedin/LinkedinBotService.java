@@ -14,7 +14,6 @@ import digital.moveto.botinok.model.entities.*;
 import digital.moveto.botinok.model.entities.enums.LocationProperty;
 import digital.moveto.botinok.model.service.*;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.text.similarity.JaroWinklerSimilarity;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -99,6 +98,46 @@ public class LinkedinBotService implements AutoCloseable {
             elementHandle.click();
             playwrightService.sleepRandom(1000);
         });
+    }
+
+    public void connectInCurrentLocation() {
+        AtomicInteger countFor24HoursForAccount = new AtomicInteger(madeContactService.getCountFor24HoursForAccount(account));
+        if (countFor24HoursForAccount.get() >= account.getCountDailyConnect()){
+            return;
+        }
+        log.info("Start connect for user " + account.getFullName() + " in current location");
+
+        playwrightService.open(ClientConst.DEFAULT_URL_FOR_MY_NETWORK_GROW);
+        playwrightService.sleepRandom(3000);
+        closeMsgDialogs();
+        Collection<ElementHandle> peopleYouMayKnowIn = playwrightService.getElementsWithText("People you may know in ");
+
+        if (peopleYouMayKnowIn.isEmpty()) {
+            log.info("No people you may know in current location for user " + account.getFullName());
+            return;
+        }
+
+        ArrayList<ElementHandle> peopleYouMayKnowInList = new ArrayList<>(peopleYouMayKnowIn);
+
+        ElementHandle blockWithUserFromCurrentLocation = playwrightService.getParent(
+                playwrightService.getParent(
+                        playwrightService.getParent(
+                        peopleYouMayKnowInList.getFirst())));
+        if (blockWithUserFromCurrentLocation == null) {
+            log.error("Can't find block with user from current location");
+            return;
+        }
+
+        List<ElementHandle> connectBtnWithUserFromCurrentLocation = playwrightService.getElementsByText(blockWithUserFromCurrentLocation, "Connect");
+
+        for (int i = 0; i < connectBtnWithUserFromCurrentLocation.size() && countFor24HoursForAccount.get() < account.getCountDailyConnect(); i++) {
+            playwrightService.getElementWithCurrentText("Connect").ifPresent(ElementHandle::click);
+            countFor24HoursForAccount.getAndIncrement();
+            playwrightService.sleepRandom(1000);
+        }
+
+        log.info("We made " + countFor24HoursForAccount.get() + " connections for user " + account.getFullName() + " in current location");
+
     }
 
     public void searchConnectsAndConnect() {
@@ -281,7 +320,7 @@ public class LinkedinBotService implements AutoCloseable {
     private void madeContact(ElementHandle elementHandle, AtomicInteger countFor24HoursForAccount) {
         //we try to connect only with hiring people
         if ( ! checkHiringStatus(elementHandle) ) {
-            if (Math.random() < globalConfig.probabilityOfConnectWithHiringUser) {
+            if (Math.random() < globalConfig.probabilityOfConnectWithNotHiringUser) {
                 log.info("User is not hiring. Skip connect.");
                 return;
             } else {

@@ -203,6 +203,13 @@ public class PlaywrightService implements AutoCloseable {
         return elementHandle.querySelector("text=" + text);
     }
 
+    public List<ElementHandle> getElementsByText(ElementHandle elementHandle, String text) {
+        return elementHandle.querySelectorAll("text=" + text)
+                .stream()
+                .filter(elementHandle1 -> elementHandle1.innerText().trim().contains(text))
+                .collect(Collectors.toList());
+    }
+
     public List<ElementHandle> getElementsWithCurrentText(String text) {
         return getLocator("text=" + text).elementHandles().stream()
                 .filter(elementHandle -> elementHandle.innerText().trim().equalsIgnoreCase(text))
