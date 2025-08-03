@@ -337,7 +337,7 @@ public class LinkedinBotService implements AutoCloseable {
                 log.info("User is not hiring. Skip connect.");
                 return;
             } else {
-                log.info("Connect anyway.");
+                log.info("User is not hiring. Connect anyway.");
             }
         }
 
