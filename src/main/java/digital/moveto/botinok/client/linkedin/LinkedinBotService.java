@@ -133,6 +133,19 @@ public class LinkedinBotService implements AutoCloseable {
         for (int i = 0; i < connectBtnWithUserFromCurrentLocation.size() && countFor24HoursForAccount.get() < account.getCountDailyConnect(); i++) {
             playwrightService.getElementWithCurrentText("Connect").ifPresent(ElementHandle::click);
             countFor24HoursForAccount.getAndIncrement();
+
+            String contactName = "User #" + (i + 1);
+            MadeContact madeContact = MadeContact.builder()
+                    .date(LocalDateTime.now())
+                    .name(contactName)
+                    .account(account).build();
+            madeContactService.save(madeContact);
+            uiElements.updateStatistic();
+
+            log.info("Connect #" + countFor24HoursForAccount.incrementAndGet() + ", with '" + contactName + "' for user " + account.getFullName());
+
+            uiElements.addLogToLogArea("Connect with user in your location: " + contactName);
+
             playwrightService.sleepRandom(1000);
         }
 
