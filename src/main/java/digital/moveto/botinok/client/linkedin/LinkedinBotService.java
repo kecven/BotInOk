@@ -892,7 +892,14 @@ public class LinkedinBotService implements AutoCloseable {
                                 );
 
                         String nameWithPosition = nameWithPositionElementHandle.innerText();
-                        String position = nameWithPosition.replace(contact.getFirstName(), "").replace(contact.getLastName(), "").trim();
+                        String[] splitPosition = nameWithPosition.split("\n");
+                        nameWithPosition = splitPosition[splitPosition.length-1];
+                        String position = nameWithPosition
+                                .replace(contact.getFirstName(), "")
+                                .replace(contact.getLastName(), "")
+                                .replace("1st degree connection", "")
+                                .replace("1st", "")
+                                .trim();
                         if (position.length() < 200) {
                             contact.setPosition(position);
                         }
@@ -917,9 +924,11 @@ public class LinkedinBotService implements AutoCloseable {
     public boolean botComplete(Account account) {
         int countApply = madeApplyService.getCountApplyFor24HoursForAccount(account);
         int getCountFor24HoursForAccount = madeContactService.getCountFor24HoursForAccount(account);
+        int countParse = contactService.getCountOfParseTodayForAccount(account);
 
         return countApply >= account.getCountDailyApply()
-                && getCountFor24HoursForAccount >= account.getCountDailyConnect();
+                && getCountFor24HoursForAccount >= account.getCountDailyConnect()
+                && countParse > globalConfig.countParseForOneTime;
     }
 
     public void applyToPositions(){
