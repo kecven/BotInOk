@@ -11,6 +11,7 @@ import digital.moveto.botinok.client.utils.FileUtils;
 import digital.moveto.botinok.model.entities.Account;
 import digital.moveto.botinok.model.entities.enums.SettingKey;
 import digital.moveto.botinok.model.service.AccountService;
+import digital.moveto.botinok.model.service.MadeContactService;
 import digital.moveto.botinok.model.service.SettingService;
 import digital.moveto.botinok.model.utils.BotinokUtils;
 import jakarta.annotation.PostConstruct;
@@ -32,6 +33,7 @@ public class LinkedinBotStarter {
     private final ApplicationContext context;
     private final GlobalConfig globalConfig;
     private final AccountService accountService;
+    private final MadeContactService madeContactService;
     private final UiElements uiElements;
     private final MainScene mainScene;
     private final TutorialScene tutorialScene;
@@ -39,10 +41,11 @@ public class LinkedinBotStarter {
 
     private ExecutorService singleThreadExecutor = Executors.newSingleThreadExecutor();
 
-    public LinkedinBotStarter(ApplicationContext context, GlobalConfig globalConfig, AccountService accountService, UiElements uiElements, MainScene mainScene, TutorialScene tutorialScene, SettingService settingService) {
+    public LinkedinBotStarter(ApplicationContext context, GlobalConfig globalConfig, AccountService accountService, MadeContactService madeContactService, UiElements uiElements, MainScene mainScene, TutorialScene tutorialScene, SettingService settingService) {
         this.context = context;
         this.globalConfig = globalConfig;
         this.accountService = accountService;
+        this.madeContactService = madeContactService;
         this.uiElements = uiElements;
         this.mainScene = mainScene;
         this.tutorialScene = tutorialScene;
@@ -235,11 +238,15 @@ public class LinkedinBotStarter {
 
         linkedinBotService.applyToPositions();
 
-        linkedinBotService.connectInCurrentLocation();
+        for (int i = 0; i < 5; i++) {
+            if (globalConfig.countConnectInYourLocation > madeContactService.getCountFor24HoursForAccount(account)) {
+                linkedinBotService.connectInCurrentLocation();
+            }
+        }
 
         linkedinBotService.searchConnectsAndConnect();
 
-        if (Math.random() > 0.99) {
+        if (Math.random() > 0.0) {
             if (!linkedinBotService.parseLinkedinUser()) {
                 linkedinBotService.parseLinkedinUrlOfConnections();
                 linkedinBotService.parseLinkedinUser();

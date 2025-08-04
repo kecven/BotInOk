@@ -27,6 +27,9 @@ public class GlobalConfig {
     @Value("true")
     public boolean workOrPauseBoolean;
 
+    @Value("${botinok.connect.countConnectInYourLocation:16}")
+    public int countConnectInYourLocation;
+
     @Value("${botinok.connect.probabilityOfConnectWithNotHiringUser:0.5}")
     public double probabilityOfConnectWithNotHiringUser;
 

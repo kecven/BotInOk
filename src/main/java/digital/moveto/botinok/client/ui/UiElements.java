@@ -72,7 +72,7 @@ public class UiElements {
     private final Label statisticConnectTotalLabel = new Label("0");
     private final Label statisticApplyTotalLabel = new Label("0");
     private final Slider countDailyApplySlider = new Slider(0, 30, 15);
-    private final Slider countDailyConnectSlider = new Slider(0, 10, 5);
+    private final Slider countDailyConnectSlider = new Slider(0, 20, 10);
 
     private Account selectAccount;
 
