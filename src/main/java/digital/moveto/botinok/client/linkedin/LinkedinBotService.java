@@ -822,7 +822,7 @@ public class LinkedinBotService implements AutoCloseable {
         int count = contactService.getCountOfParseTodayForAccount(account);
         for (int i = 0; i < contacts.size()
                 && count < globalConfig.countParseForOneTime
-                && count < account.getCountDailyConnect(); i++) {
+                && count < account.getCountDailyConnect() * 2; i++) {
             Contact contact = contacts.get(i);
 
             // update only if we have old update. Older then 6 months
@@ -834,45 +834,72 @@ public class LinkedinBotService implements AutoCloseable {
             playwrightService.open(contact.getLinkedinUrl() + "/overlay/contact-info/");
             playwrightService.sleepRandom(5000);
 
+            // First and Last name
+            Optional<ElementHandle> nameElementHandlerOption = playwrightService.getElementByLocator("h1#pv-contact-info");
+            if (nameElementHandlerOption.isPresent()) {
+                String[] names = nameElementHandlerOption.get().innerText().split(" ", 2);
+                String firstName = names[0];
+                String lastName = names.length > 1 ? names[1] : "";
+                contact.setFirstName(firstName);
+                contact.setLastName(lastName);
+            } else {
+                log.error("Can't find user name for " + contact.getLinkedinUrl());
+            }
+
             // Phone
-            Optional<ElementHandle> elementByLocator =
-                    playwrightService.getElementByLocator("section > div > section.pv-contact-info__contact-type.ci-phone > ul > li > span.t-14.t-black.t-normal");
-            if (elementByLocator.isPresent()) {
-                String text = elementByLocator.get().textContent().trim();
-                contact.setPhone(text);
+            List<ElementHandle> phoneElement = playwrightService.getElementsWithCurrentText("Phone");
+            if (!phoneElement.isEmpty()) {
+                String phoneWithText = playwrightService.getNextElement(phoneElement.getFirst()).innerText().trim();
+                String phone = phoneWithText.replaceAll("[^+\\d]", "");
+                contact.setPhone(phone);
             }
 
             // Email
-            elementByLocator =
-                    playwrightService.getElementByLocator("section > div > section.pv-contact-info__contact-type.ci-email > div > a");
+            List<ElementHandle> emailElement = playwrightService.getElementsWithCurrentText("Email");
+            if (!emailElement.isEmpty()) {
+                String email = playwrightService.getNextElement(emailElement.getFirst()).innerText().trim();
+                contact.setEmail(email);
+            }
+
+            // Location and Position
+            Optional<ElementHandle> elementByLocator = playwrightService.getElementByLocator("use[href='#close-medium']");
             if (elementByLocator.isPresent()) {
-                String text = elementByLocator.get().textContent().trim();
-                contact.setEmail(text);
-            }
+                elementByLocator.get().click();
+                playwrightService.sleepRandom(500);
 
-            // Location
-            elementByLocator =
-                    playwrightService.getElementByLocator("section > div > section.pv-contact-info__contact-type.ci-address > div > a");
-            if (elementByLocator.isPresent()) {
-                String text = elementByLocator.get().textContent().trim();
-                if (text.length() < 200) {
-                    contact.setLocation(text);
+                // Location
+                Optional<ElementHandle> contactInfoElementHandle = playwrightService.getElementWithCurrentText("Contact info");
+                if (contactInfoElementHandle.isPresent()) {
+                    ElementHandle Location = playwrightService.getPreviousElement(playwrightService.getParent(contactInfoElementHandle.get()));
+
+                    String locationText = Location.innerText().trim();
+                    if (locationText.length() < 200) {
+                        contact.setLocation(locationText);
+                    }
+                } else {
+                    log.error("Can't find Contact info field for " + contact.getLinkedinUrl());
                 }
-            }
 
-            if (contact.getLocation() == null) {
-                playwrightService.click(10, 10);
-                playwrightService.sleepRandom(300);
-                elementByLocator =
-                        playwrightService.getElementByLocator("div.ph5.pb5 > div.mt2.relative > div.pv-text-details__left-panel.mt2 > span.text-body-small.inline.t-black--light.break-words");
-                if (elementByLocator.isPresent()) {
-                    String text = elementByLocator.get().textContent().trim();
-                    contact.setLocation(text);
+                // Position
+                if (contactInfoElementHandle.isPresent()) {
+                    ElementHandle nameWithPositionElementHandle =
+                            playwrightService.getPreviousElement(
+                                    playwrightService.getPreviousElement(
+                                            playwrightService.getParent(
+                                                    playwrightService.getParent(
+                                                            contactInfoElementHandle.get())))
+                            );
+
+                    String nameWithPosition = nameWithPositionElementHandle.innerText();
+                    String position = nameWithPosition.replace(contact.getFirstName(), "").replace(contact.getLastName(), "").trim();
+                    if (position.length() < 200) {
+                        contact.setPosition(position);
+                    }
+
                 }
+            } else {
+                log.error("Can't find close button for contact info");
             }
-
-//            String html = playwrightService.getPage().innerHTML("html");
-//            linkedinUser.setHtml(html);
 
             contact.setUpdatedDate(LocalDate.now());
             contact.setParseDate(LocalDate.now());
