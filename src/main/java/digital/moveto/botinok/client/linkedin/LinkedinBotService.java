@@ -114,7 +114,12 @@ public class LinkedinBotService implements AutoCloseable {
 
         if (peopleYouMayKnowIn.isEmpty()) {
             log.info("No people you may know in current location for user " + account.getFullName());
-            return;
+            peopleYouMayKnowIn = playwrightService.getElementsWithText("More suggestions for you");
+
+            if (peopleYouMayKnowIn.isEmpty()) {
+                log.info("No people suggestion for user " + account.getFullName());
+                return;
+            }
         }
 
         ArrayList<ElementHandle> peopleYouMayKnowInList = new ArrayList<>(peopleYouMayKnowIn);
@@ -854,6 +859,7 @@ public class LinkedinBotService implements AutoCloseable {
                     contact.setLocation(text);
                 }
             }
+
             if (contact.getLocation() == null) {
                 playwrightService.click(10, 10);
                 playwrightService.sleepRandom(300);
