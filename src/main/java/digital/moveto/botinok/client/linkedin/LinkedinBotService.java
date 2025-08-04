@@ -877,28 +877,31 @@ public class LinkedinBotService implements AutoCloseable {
                         contact.setLocation(locationText);
                     }
                 } else {
-                    log.error("Can't find Contact info field for " + contact.getLinkedinUrl());
+                    log.warn("Can't find Contact info field for " + contact.getLinkedinUrl());
                 }
 
-                // Position
-                if (contactInfoElementHandle.isPresent()) {
-                    ElementHandle nameWithPositionElementHandle =
-                            playwrightService.getPreviousElement(
-                                    playwrightService.getPreviousElement(
-                                            playwrightService.getParent(
-                                                    playwrightService.getParent(
-                                                            contactInfoElementHandle.get())))
-                            );
+                try {
+                    // Position
+                    if (contactInfoElementHandle.isPresent()) {
+                        ElementHandle nameWithPositionElementHandle =
+                                playwrightService.getPreviousElement(
+                                        playwrightService.getPreviousElement(
+                                                playwrightService.getParent(
+                                                        playwrightService.getParent(
+                                                                contactInfoElementHandle.get())))
+                                );
 
-                    String nameWithPosition = nameWithPositionElementHandle.innerText();
-                    String position = nameWithPosition.replace(contact.getFirstName(), "").replace(contact.getLastName(), "").trim();
-                    if (position.length() < 200) {
-                        contact.setPosition(position);
+                        String nameWithPosition = nameWithPositionElementHandle.innerText();
+                        String position = nameWithPosition.replace(contact.getFirstName(), "").replace(contact.getLastName(), "").trim();
+                        if (position.length() < 200) {
+                            contact.setPosition(position);
+                        }
                     }
-
+                } catch (Exception e){
+                    log.warn("Can't parse position for user");
                 }
             } else {
-                log.error("Can't find close button for contact info");
+                log.warn("Can't find close button for contact info");
             }
 
             contact.setUpdatedDate(LocalDate.now());
