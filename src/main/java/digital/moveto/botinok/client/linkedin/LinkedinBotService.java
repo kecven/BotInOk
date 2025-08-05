@@ -385,7 +385,9 @@ public class LinkedinBotService implements AutoCloseable {
             playwrightService.sleepRandom(500);
         } else { // invitation with text
 
+            playwrightService.getElementWithCurrentText("Add a free note").ifPresent(ElementHandle::click);
             playwrightService.getElementWithCurrentText("Add a note").ifPresent(ElementHandle::click);
+
             playwrightService.sleepRandom(500);
             checkForLimitInvitationsAndCloseDialog();
 
@@ -426,6 +428,7 @@ public class LinkedinBotService implements AutoCloseable {
         }
         if (playwrightService.isTextFind("No free personalized invitations left")
                 || playwrightService.isTextFind("Personalize all your invites and access AI writing")
+                || playwrightService.isTextFind("Send unlimited personalized invites with Premium")
                 || playwrightService.isTextFind("0 personalized invitations remaining for this month.")) {
             log.info("You've sent too many invitations for user " + account.getFullName());
             accountNoFreePersonalizedInvitationsLeft = true;
