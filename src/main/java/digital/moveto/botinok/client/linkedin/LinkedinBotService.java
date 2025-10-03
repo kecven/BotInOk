@@ -538,8 +538,8 @@ public class LinkedinBotService implements AutoCloseable {
 //
 //        }
         log.info("sleep 180 sec for captca and second factor");
-        sleep(180_000, false);
-//        playwrightService.waitForSelector("input[placeholder=Search]");
+//        sleep(180_000, false); //TODO: change to 180
+        playwrightService.waitForSelector("input[placeholder=Search]");
 
         closeHeadlessBrowserIfNeed();
     }
@@ -1115,6 +1115,9 @@ public class LinkedinBotService implements AutoCloseable {
             if (suggestEasyApplyBtn.equals("Easy Apply")) {
                 elementByLocator.get().click();
                 playwrightService.sleepRandom(1000);
+
+                addPhoneAndPhoneCode(account);
+
                 for (int j = 0; j < 10; j++) {
 
                     Optional<ElementHandle> uploadResume = playwrightService.getElementWithCurrentText("Be sure to include an updated resume");
@@ -1167,6 +1170,26 @@ public class LinkedinBotService implements AutoCloseable {
                     playwrightService.sleepRandom(1000);
                 }
             }
+        }
+    }
+
+    private void addPhoneAndPhoneCode(Account account) {
+        try {
+            if (account.getPhone() != null && !account.getPhone().isEmpty()) {
+                Optional<ElementHandle> mobilePhoneNumber = playwrightService.getElementWithCurrentText("Mobile phone number");
+                ElementHandle phoneInput = playwrightService.getNextElement(mobilePhoneNumber.get());
+
+                phoneInput.fill(account.getPhone());
+            }
+
+            if (account.getPhoneCode() != null && !account.getPhoneCode().isEmpty()) {
+                Optional<ElementHandle> phoneCountryCode = playwrightService.getElementWithCurrentText("Phone country code");
+                ElementHandle phoneCodeSelect = playwrightService.getNextElement(playwrightService.getNextElement(playwrightService.getParent(phoneCountryCode.get())));
+
+                phoneCodeSelect.selectOption(account.getPhoneCode());
+            }
+        } catch (Exception e){
+            log.error("Error add correct phone number");
         }
     }
 }

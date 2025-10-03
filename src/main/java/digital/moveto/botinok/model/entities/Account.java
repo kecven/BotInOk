@@ -75,6 +75,12 @@ public class Account {
     @Column(name = "remote_work", columnDefinition = "boolean default false", nullable = false)
     private Boolean remoteWork;
 
+    @Column(name = "phone", length = 255)
+    private String phone;
+
+    @Column(name = "phone_code", length = 255)
+    private String phoneCode;
+
     public String getShortComment(){
         return shortComment == null ? "" : shortComment;
     }
