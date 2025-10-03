@@ -917,8 +917,8 @@ public class LinkedinBotService implements AutoCloseable {
             contact.setUpdatedDate(LocalDate.now());
             contact.setParseDate(LocalDate.now());
             contactService.saveAndFlush(contact);
-            log.debug("User " + ++count + "/" + contacts.size() + ". Parsed and save.");
             log.debug(contact.toString());
+            log.debug("User " + ++count + "/" + contacts.size() + ". Parsed and save.");
 
         }
         return count >= globalConfig.countParseForOneTime;
@@ -1115,6 +1115,12 @@ public class LinkedinBotService implements AutoCloseable {
             if (suggestEasyApplyBtn.equals("Easy Apply")) {
                 elementByLocator.get().click();
                 playwrightService.sleepRandom(1000);
+
+                Optional<ElementHandle> jobSearchSafetyReminder = playwrightService.getElementWithCurrentText("Job search safety reminder");
+                if (jobSearchSafetyReminder.isPresent()) {
+                    playwrightService.getElementWithCurrentText("Continue applying").ifPresent(ElementHandle::click);
+                    playwrightService.sleepRandom(1000);
+                }
 
                 addPhoneAndPhoneCode(account);
 
