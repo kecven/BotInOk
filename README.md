@@ -2,17 +2,6 @@
 
 BotInOk Client is an open-source project that automates LinkedIn interactions using Java, Spring Boot, and Playwright. It helps users to connect with potential contacts and apply for job positions on LinkedIn.
 
-## Download the Latest Build
-
-[BotInOk Windows with JDK](https://botinok.work/downloads/BotInOk-windows.zip)
-
-[BotInOk MacOs with JDK](https://botinok.work/downloads/BotInOk-macos.zip)
-
-[BotInOk Linux with JDK](https://botinok.work/downloads/BotInOk-linux.zip)
-
-[BotInOk JAR without JDK](https://botinok.work/downloads/BotInOk-latest.jar)
-
-
 ## Features
 
 - Automated LinkedIn connections
@@ -40,6 +29,9 @@ cd BotInOk
 ```
 
 ### Build the Project
+
+Install Java 21 JDK
+Download JavaFX 21 for your os. Put it to  libs folder. For example ./libs/linux-javafx-sdk-21.0.5
 
 ```bash
 ./gradlew build
