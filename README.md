@@ -31,7 +31,12 @@ cd BotInOk
 ### Build the Project
 
 Install Java 21 JDK
-Download JavaFX 21 for your os. Put it to  libs folder. For example ./libs/linux-javafx-sdk-21.0.5
+
+Download JavaFX 21 for your os.
+
+Put it to  libs folder. For example ./libs/linux-javafx-sdk-21.0.5
+
+
 
 ```bash
 ./gradlew build
