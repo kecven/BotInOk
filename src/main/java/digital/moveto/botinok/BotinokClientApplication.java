@@ -62,9 +62,11 @@ public class BotinokClientApplication extends Application {
 
 	@Override
 	public void stop() {
-		SpringApplication.exit(SpringApplication.run(BotinokClientApplication.class, args));
+		if (applicationContext != null) {
+			SpringApplication.exit(applicationContext, () -> 0);
+			applicationContext.close();
+		}
 		Platform.exit();
-		System.exit(0);
 	}
 
 	private class StageReadyEvent extends ApplicationEvent {
