@@ -114,6 +114,7 @@ public class AutoCompleteTextField<S> extends TextField {
      *
      * @param entrySet
      */
+    @SuppressWarnings("this-escape")
     public AutoCompleteTextField(SortedSet<S> entrySet) {
         super();
         this.entries = (entrySet == null ? new TreeSet<>() : entrySet);

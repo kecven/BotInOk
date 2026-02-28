@@ -70,6 +70,8 @@ public class BotinokClientApplication extends Application {
 	}
 
 	private class StageReadyEvent extends ApplicationEvent {
+		private static final long serialVersionUID = 1L;
+
 		public StageReadyEvent(Stage stage) {
 			super(stage);
 		}

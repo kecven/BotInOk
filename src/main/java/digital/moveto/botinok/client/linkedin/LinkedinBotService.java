@@ -392,7 +392,7 @@ public class LinkedinBotService implements AutoCloseable {
             checkForLimitInvitationsAndCloseDialog();
 
             final String inviteMessage = generateInviteMessage();
-            playwrightService.getElementByLocator("textarea[name=message]").ifPresent(eh -> eh.type(inviteMessage, new ElementHandle.TypeOptions().setDelay(10)));
+            playwrightService.getElementByLocator("textarea[name=message]").ifPresent(eh -> eh.fill(inviteMessage));
             playwrightService.sleepRandom(2000);
             playwrightService.getElementWithCurrentText("Send").ifPresent(ElementHandle::click);
             playwrightService.sleepRandom(500);

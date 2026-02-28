@@ -11,7 +11,6 @@ import lombok.Getter;
 import lombok.Setter;
 import org.apache.logging.log4j.util.Strings;
 
-import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -19,7 +18,7 @@ import java.util.UUID;
 
 @Getter
 @Setter
-public class AccountDto implements Serializable {
+public class AccountDto {
     private UUID id;
 
     private String folder;

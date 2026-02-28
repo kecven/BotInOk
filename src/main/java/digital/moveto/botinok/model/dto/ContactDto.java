@@ -9,13 +9,12 @@ import digital.moveto.botinok.model.entities.Contact;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.UUID;
 
 @Getter
 @Setter
-public class ContactDto implements Serializable {
+public class ContactDto {
 
     private UUID id;
 

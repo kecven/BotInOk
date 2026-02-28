@@ -5,12 +5,11 @@ import digital.moveto.botinok.model.entities.Company;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.io.Serializable;
 import java.util.UUID;
 
 @Getter
 @Setter
-public class CompanyDto implements Serializable {
+public class CompanyDto {
 
     private UUID id;
 

@@ -10,13 +10,12 @@ import digital.moveto.botinok.model.entities.MadeApply;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Getter
 @Setter
-public class MadeApplyDto implements Serializable {
+public class MadeApplyDto {
 
     private UUID id;
 
