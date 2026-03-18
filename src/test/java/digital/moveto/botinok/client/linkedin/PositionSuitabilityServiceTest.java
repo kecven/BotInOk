@@ -83,6 +83,21 @@ class PositionSuitabilityServiceTest {
     }
 
     @Test
+    void shouldParseStructuredJsonWithWhitespace() {
+        GlobalConfig globalConfig = createOllamaConfig();
+        globalConfig.ollamaHealthcheckEnabled = false;
+        RecordingHttpClient httpClient = new RecordingHttpClient()
+                .respond("/api/generate", 200, "{\"response\":\"{\\n  \\\"suitable\\\": false\\n}\"}");
+
+        OllamaPositionMatcher ollamaMatcher = new OllamaPositionMatcher(globalConfig, httpClient, new ObjectMapper());
+
+        boolean result = ollamaMatcher.isPositionSuitable(List.of("Java Developer"), "Principal Engineer, AI/ML")
+                .orElse(true);
+
+        assertFalse(result);
+    }
+
+    @Test
     void shouldUseRegularTimeoutWhileModelIsWarm() {
         GlobalConfig globalConfig = createOllamaConfig();
         globalConfig.ollamaHealthcheckCacheMs = 60_000;

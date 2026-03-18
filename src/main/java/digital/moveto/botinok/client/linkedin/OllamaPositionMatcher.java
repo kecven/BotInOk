@@ -27,6 +27,7 @@ import java.util.regex.Pattern;
 public class OllamaPositionMatcher implements PositionMatcher {
 
     private static final Pattern KEEP_ALIVE_PATTERN = Pattern.compile("^(-?\\d+)(ms|s|m|h)?$");
+    private static final Pattern SUITABLE_PATTERN = Pattern.compile("\"suitable\"\\s*:\\s*(true|false)", Pattern.CASE_INSENSITIVE);
 
     private final GlobalConfig globalConfig;
     private final HttpClient httpClient;
@@ -69,14 +70,21 @@ public class OllamaPositionMatcher implements PositionMatcher {
             return Optional.empty();
         }
 
+        log.info("Checking position suitability via Ollama. Job title='{}', target roles={}, model='{}', endpoint='{}:{}'",
+                positionToCheck, validPositions, globalConfig.ollamaModel, globalConfig.ollamaHost, globalConfig.ollamaPort);
+
         if (globalConfig.ollamaHealthcheckEnabled && !isOllamaAvailable()) {
             return Optional.empty();
         }
 
         try {
+            Duration timeout = resolveGenerateTimeout();
+            log.info("Sending position suitability request to Ollama. Job title='{}', timeoutMs={}, keepAlive='{}'",
+                    positionToCheck, timeout.toMillis(), globalConfig.ollamaKeepAlive);
+
             HttpRequest request = HttpRequest.newBuilder(buildUri("/api/generate"))
                     .header("Content-Type", "application/json")
-                    .timeout(resolveGenerateTimeout())
+                    .timeout(timeout)
                     .POST(HttpRequest.BodyPublishers.ofString(buildRequestBody(validPositions, positionToCheck)))
                     .build();
 
@@ -94,6 +102,7 @@ public class OllamaPositionMatcher implements PositionMatcher {
                 return Optional.empty();
             }
 
+            log.info("Ollama decision for job title='{}': suitable={}", positionToCheck, decision);
             markModelWarm();
             return Optional.of(decision);
         } catch (IOException | InterruptedException e) {
@@ -113,6 +122,8 @@ public class OllamaPositionMatcher implements PositionMatcher {
         }
 
         try {
+            log.debug("Running Ollama healthcheck for model '{}' against {}:{}",
+                    globalConfig.ollamaModel, globalConfig.ollamaHost, globalConfig.ollamaPort);
             HttpRequest request = HttpRequest.newBuilder(buildUri("/api/tags"))
                     .timeout(timeoutDuration(globalConfig.ollamaRequestTimeoutMs))
                     .GET()
@@ -127,9 +138,13 @@ public class OllamaPositionMatcher implements PositionMatcher {
                 if (!lastModelAvailableResult) {
                     log.warn("Ollama model '{}' is not available on server {}:{}. Standard position matcher will be used.",
                             globalConfig.ollamaModel, globalConfig.ollamaHost, globalConfig.ollamaPort);
+                } else {
+                    log.info("Ollama healthcheck passed and model '{}' is available on {}:{}.",
+                            globalConfig.ollamaModel, globalConfig.ollamaHost, globalConfig.ollamaPort);
                 }
             } else {
                 lastModelAvailableResult = true;
+                log.info("Ollama healthcheck passed on {}:{}.", globalConfig.ollamaHost, globalConfig.ollamaPort);
             }
         } catch (IOException | InterruptedException e) {
             if (e instanceof InterruptedException) {
@@ -264,11 +279,9 @@ public class OllamaPositionMatcher implements PositionMatcher {
         }
 
         String normalized = rawResponse.trim().toLowerCase();
-        if (normalized.contains("\"suitable\":true") || normalized.contains("\"suitable\" : true")) {
-            return true;
-        }
-        if (normalized.contains("\"suitable\":false") || normalized.contains("\"suitable\" : false")) {
-            return false;
+        Matcher matcher = SUITABLE_PATTERN.matcher(normalized);
+        if (matcher.find()) {
+            return Boolean.parseBoolean(matcher.group(1));
         }
         if (normalized.startsWith("yes") || normalized.startsWith("true")) {
             return true;
