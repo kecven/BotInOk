@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import digital.moveto.botinok.client.config.GlobalConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -36,6 +37,7 @@ public class OllamaPositionMatcher implements PositionMatcher {
     private boolean missingConfigLogged;
     private Instant modelWarmUntil;
 
+    @Autowired
     public OllamaPositionMatcher(GlobalConfig globalConfig) {
         this(globalConfig, HttpClient.newBuilder()
                 .connectTimeout(timeoutDuration(globalConfig.ollamaConnectTimeoutMs))
