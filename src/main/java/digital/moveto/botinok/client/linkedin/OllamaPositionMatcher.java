@@ -1,5 +1,6 @@
 package digital.moveto.botinok.client.linkedin;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import digital.moveto.botinok.client.config.GlobalConfig;
@@ -300,6 +301,7 @@ public class OllamaPositionMatcher implements PositionMatcher {
     private record OllamaOptions(double temperature) {
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private record OllamaGenerateResponse(String response, String thinking, Long load_duration) {
     }
 
@@ -312,9 +314,11 @@ public class OllamaPositionMatcher implements PositionMatcher {
     private record OllamaBooleanProperty(String type) {
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private record OllamaTagsResponse(List<OllamaTagModel> models) {
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private record OllamaTagModel(String name, String model) {
     }
 }
