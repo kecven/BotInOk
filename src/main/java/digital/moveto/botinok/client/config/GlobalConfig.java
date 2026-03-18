@@ -36,4 +36,37 @@ public class GlobalConfig {
     @Value("${botinok.apply.thresholdPositionSuitableScore:0.7}")
     public double thresholdPositionSuitableScore;
 
+    @Value("${botinok.apply.ollama.enabled:false}")
+    public boolean ollamaEnabled;
+
+    @Value("${botinok.apply.ollama.host:127.0.0.1}")
+    public String ollamaHost;
+
+    @Value("${botinok.apply.ollama.port:11434}")
+    public int ollamaPort;
+
+    @Value("${botinok.apply.ollama.model:}")
+    public String ollamaModel;
+
+    @Value("${botinok.apply.ollama.healthcheckEnabled:true}")
+    public boolean ollamaHealthcheckEnabled;
+
+    @Value("${botinok.apply.ollama.checkModelAvailability:true}")
+    public boolean ollamaCheckModelAvailability;
+
+    @Value("${botinok.apply.ollama.healthcheckCacheMs:60000}")
+    public long ollamaHealthcheckCacheMs;
+
+    @Value("${botinok.apply.ollama.connectTimeoutMs:1500}")
+    public int ollamaConnectTimeoutMs;
+
+    @Value("${botinok.apply.ollama.requestTimeoutMs:5000}")
+    public int ollamaRequestTimeoutMs;
+
+    @Value("${botinok.apply.ollama.coldStartTimeoutMs:120000}")
+    public int ollamaColdStartTimeoutMs;
+
+    @Value("${botinok.apply.ollama.keepAlive:15m}")
+    public String ollamaKeepAlive;
+
 }

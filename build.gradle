@@ -45,6 +45,8 @@ dependencies {
     implementation('org.openjfx:javafx-controls:21.0.5')
 
     implementation("org.apache.commons:commons-text:1.13.0")
+
+    testImplementation('org.springframework.boot:spring-boot-starter-test')
 }
 
 test {

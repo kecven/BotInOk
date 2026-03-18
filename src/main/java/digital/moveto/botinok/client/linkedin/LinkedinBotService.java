@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 
 import static digital.moveto.botinok.client.config.ClientConst.*;
 import static digital.moveto.botinok.model.Const.*;
@@ -48,13 +47,14 @@ public class LinkedinBotService implements AutoCloseable {
     private final CompanyService companyService;
     private final GlobalConfig globalConfig;
     private final UiElements uiElements;
+    private final PositionSuitabilityService positionSuitabilityService;
 
     private Account account;
 
     private boolean accountNoFreePersonalizedInvitationsLeft = false;
 
     @Autowired
-    public LinkedinBotService(PlaywrightService playwrightService, AccountService accountService, MadeContactService madeContactService, MadeApplyService madeApplyService, ContactService contactService, CompanyService companyService, GlobalConfig globalConfig, UiElements uiElements) {
+    public LinkedinBotService(PlaywrightService playwrightService, AccountService accountService, MadeContactService madeContactService, MadeApplyService madeApplyService, ContactService contactService, CompanyService companyService, GlobalConfig globalConfig, UiElements uiElements, PositionSuitabilityService positionSuitabilityService) {
         this.playwrightService = playwrightService;
         this.accountService = accountService;
         this.madeContactService = madeContactService;
@@ -63,6 +63,7 @@ public class LinkedinBotService implements AutoCloseable {
         this.companyService = companyService;
         this.globalConfig = globalConfig;
         this.uiElements = uiElements;
+        this.positionSuitabilityService = positionSuitabilityService;
     }
 
     public Account getAccount() {
@@ -1023,31 +1024,7 @@ public class LinkedinBotService implements AutoCloseable {
      * @return true if position suitable
      */
     public boolean isPositionSuitable(List<String> validPositions, String positionToCheck) {
-        String normalizedToCheck = normalize(positionToCheck);
-
-        for (String valid : validPositions) {
-            String normalizedValid = normalize(valid);
-            double score = SIMILARITY.apply(normalizedValid, normalizedToCheck);
-            if (score > globalConfig.thresholdPositionSuitableScore) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private String normalize(String text) {
-        if (text == null) return "";
-
-        String cleaned = text.toLowerCase()
-                .replaceAll("[^a-z0-9 ]", " ")
-                .replaceAll("\\s+", " ")
-                .trim();
-
-        List<String> words = Arrays.asList(cleaned.split(" "));
-        return words.stream()
-                .filter(word -> !STOP_WORDS.contains(word))
-                .collect(Collectors.joining(" "));
+        return positionSuitabilityService.isPositionSuitable(validPositions, positionToCheck);
     }
 
     private void applyToCurrentPosition(AtomicInteger countApply){
